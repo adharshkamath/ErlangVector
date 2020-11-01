@@ -12,8 +12,7 @@ logThis(Message, FileName, Vcs, Modes) ->
     ok.
 
 writeLogs(S, Message, Vcs) ->
-    io:format(S, "~s~n", [Message]),
-    io:format(S, "~w~n", [Vcs]).
+    io:format(S, "~s~n~w~n", [Message, Vcs]).
 
 logLocalEvent(Message, FileName, Vc, Pid) ->
     NewVC = vclock:tick(Pid, Vc),
