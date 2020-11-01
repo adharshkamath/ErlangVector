@@ -3,16 +3,16 @@
 -import(file, [open/2, write/2]).
 
 
-logThis(Message, FileName, Vcs, Modes) ->
+logThis(Message, FileName, VClock, Modes) ->
     {ok, Device} = file:open(FileName ++ "-log.txt", Modes),
     try 
-        writeLogs(Device, Message, Vcs)
+        writeLogs(Device, Message, VClock)
         after file:close(Device)
     end,
     ok.
 
-writeLogs(S, Message, Vcs) ->
-    io:format(S, "~s~n~w~n", [Message, Vcs]).
+writeLogs(S, Message, VClock) ->
+    io:format(S, "~s~n~w~n", [Message, VClock]).
 
 logLocalEvent(Message, FileName, Vc, Pid) ->
     NewVC = vclock:tick(Pid, Vc),
