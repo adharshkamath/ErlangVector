@@ -25,15 +25,17 @@ Functions:
 ```
 vclock:init() - starts the clock and waits to receive messages from connected nodes
 
-util:broadcast(ProcessName) - Sends a broadcast signal to the local process with registered name 
-                                ProcessName, which then broadcasts its current vector
+util:broadcast(PName) - Sends a broadcast signal to the local process with registered
+                                name PName, which then broadcasts its current vector
 
-util:unicast(ProcessName, Recepient) - Sends a unicast signal to the local process with with registered name 
-                                ProcessName, which then sends its current vector to a remote node named Recepient
+util:unicast(PName, Dest) - Sends a unicast signal to the local process with registered name 
+                      PName, which then sends its current vector to a remote node named Dest
 
-util:recordEvent(ProcessName, EventName) - Registers a new event with name EventName, 
-                                        in a local process with registered name ProcessName
+util:recordEvent(PName, EvName) - Registers a new event with name EvName, 
+                                        in a local process with registered name PName
 
-util:kill(ProcessName) - Sends a kill signal to the local process with registered name ProcessName 
+util:kill(PName) - Sends a kill signal to the local process with registered name PName 
 
 ```
+
+The logs for each node will be written to a file named *\<NodeName\>*_log.txt
