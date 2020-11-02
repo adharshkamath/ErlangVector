@@ -67,7 +67,7 @@ receiveMessage(P = #process{}) ->
     receive
         broadcast -> 
                     broadcastVector(P), 
-                    io:format("~s~n", ["Valid message  sent (Broadcast)"]),
+                    io:format("~s~n", ["Valid message sent (Broadcast)"]),
                     receiveMessage(P);
         { unicast, Node } -> 
                     sendMsgToNode(P, Node), 
@@ -75,7 +75,7 @@ receiveMessage(P = #process{}) ->
                     receiveMessage(P);
         { event, EvName } -> 
                     NewP = newLocalEvent("Event - " ++ EvName, P), 
-                    io:format("~s~n", ["Valid message  sent (Broadcast)"]),
+                    io:format("~s~n", ["Valid Event registered"]),
                     receiveMessage(NewP);
         { Node, Vector } -> 
                     NewP = newLocalEvent("Received Msg From - " ++ atom_to_list(Node), P), 
