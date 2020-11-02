@@ -11,7 +11,7 @@ erl -make
 To run:
 
 ```
-erl -pa ebin
+erl -pa ebin -sname <node_name>
 ```
 
 To clean 
