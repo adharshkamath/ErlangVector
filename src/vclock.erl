@@ -40,14 +40,16 @@ broadcastVector(P) ->
     ThisNode = list_to_atom(lists:nth(1, string:tokens(atom_to_list(node()), "@"))),
     Nodes = [ list_to_atom(lists:nth(1, string:tokens(atom_to_list(NName), "@"))) || NName <- nodes()],
     NewP = newLocalEvent("Broadcasting message", P),
-    [{Proc, Node} ! {ThisNode, NewP#process.tVector} || Proc <- Nodes, Node <- nodes()].
+    [{Proc, Node} ! {ThisNode, NewP#process.tVector} || Proc <- Nodes, Node <- nodes()],
+    NewP.
 
 sendMsgToNode(P, Node) ->
     ThisNode = list_to_atom(lists:nth(1, string:tokens(atom_to_list(node()), "@"))),
     NodeReg = list_to_atom(lists:nth(1, string:tokens(atom_to_list(Node), "@"))),
     NewP = newLocalEvent("Sending to " ++ lists:nth(1, string:tokens(atom_to_list(Node), "@")) ++ ", Time : " ++ 
                             integer_to_list(P#process.pClock#clock.localTime + 1), P),
-    {NodeReg, Node} ! {ThisNode, NewP#process.tVector}.
+    {NodeReg, Node} ! {ThisNode, NewP#process.tVector},
+    NewP.
 
 newLocalEvent(EvName, #process{pName=PName, tVector=Vector, pClock=Clock}) ->
     ThisName = list_to_atom(lists:nth(1, string:tokens(atom_to_list(node()), "@"))),
@@ -66,13 +68,13 @@ newLocalEvent(EvName, #process{pName=PName, tVector=Vector, pClock=Clock}) ->
 receiveMessage(P = #process{}) ->
     receive
         broadcast -> 
-                    broadcastVector(P), 
+                    NewP = broadcastVector(P), 
                     io:format("~s~n", ["Valid message sent (Broadcast)"]),
-                    receiveMessage(P);
+                    receiveMessage(NewP);
         { unicast, Node } -> 
-                    sendMsgToNode(P, Node), 
+                    NewP = sendMsgToNode(P, Node), 
                     io:format("~s~n", ["Valid message sent (Unicast)"]),
-                    receiveMessage(P);
+                    receiveMessage(NewP);
         { event, EvName } -> 
                     NewP = newLocalEvent("Event - " ++ EvName, P), 
                     io:format("~s~n", ["Valid Event registered"]),
