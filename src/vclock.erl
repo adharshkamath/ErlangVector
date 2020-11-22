@@ -16,10 +16,10 @@ init() ->
     AtomName = list_to_atom(lists:nth(1, string:tokens(atom_to_list(node()), "@"))),
     register(AtomName, spawn(fun() -> receiveMessage(NewP) end)).
 
-merge(Vector1, Vector2, ThisP = #process{pName=PName}) ->
+merge(Vector1, Vector2, ThisP = #process{pName=PName}, MsgText) ->
     Result = maps:fold(fun(K, V, Map) -> maps:update_with(K, fun(X) -> erlang:max(X, V) end, V, Map) end, Vector1, Vector2),
     ProcessName = list_to_atom(lists:nth(1, string:tokens(atom_to_list(node()), "@"))),
-    log:logThis("Updating local vector clock", atom_to_list(ProcessName), Result, [append]),
+    log:logThis(MsgText ++ " -- Updated local vector clock", atom_to_list(ProcessName), Result, [append]),
     #process{
         pName=PName,
         tVector=Result,
@@ -29,7 +29,7 @@ merge(Vector1, Vector2, ThisP = #process{pName=PName}) ->
 newProcessVector() ->
     Nodes = [ list_to_atom(lists:nth(1, string:tokens(atom_to_list(NName), "@"))) || 
                     NName <- lists:append(nodes(), [node()])],
-    maps:from_list([{Node, 0} || Node <- Nodes]).
+    maps:from_list([{Node, 1} || Node <- Nodes]).
 
 newProcess(PName) ->
     #process{
@@ -50,6 +50,18 @@ sendMsgToNode(P, Node) ->
                             integer_to_list(P#process.pClock#clock.localTime + 1), P),
     {NodeReg, Node} ! {ThisNode, NewP#process.tVector},
     NewP.
+
+recvEvent(EvName, #process{pName=PName, tVector=Vector, pClock=Clock}) ->
+    ThisName = list_to_atom(lists:nth(1, string:tokens(atom_to_list(node()), "@"))),
+    NewTime = Clock#clock.localTime + 1,
+    NewVector = maps:update(ThisName, NewTime, Vector),
+    NewEvents = maps:put(list_to_atom(EvName), NewTime, Clock#clock.events),
+    NewClock = #clock{localTime=NewTime, events=NewEvents},
+    #process{
+            pName=PName,
+            pClock=NewClock,
+            tVector=NewVector
+        }.
 
 newLocalEvent(EvName, #process{pName=PName, tVector=Vector, pClock=Clock}) ->
     ThisName = list_to_atom(lists:nth(1, string:tokens(atom_to_list(node()), "@"))),
@@ -80,9 +92,10 @@ receiveMessage(P = #process{}) ->
                     io:format("~s~n", ["Valid Event registered"]),
                     receiveMessage(NewP);
         { Node, Vector } -> 
-                    NewP = newLocalEvent("Received Msg From - " ++ atom_to_list(Node), P), 
+                    MsgString = "Received Msg From - " ++ atom_to_list(Node),
+                    NewP = recvEvent(MsgString, P), 
                     io:format("~s~n", ["Vector message received"]),
-                    receiveMessage(merge(Vector, NewP#process.tVector, NewP));
+                    receiveMessage(merge(Vector, NewP#process.tVector, NewP, MsgString));
         kill -> 
                 io:format("~p~nTeminating graciously..~n", [P]);
         _ ->     
