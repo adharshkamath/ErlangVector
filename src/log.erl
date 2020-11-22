@@ -13,4 +13,4 @@ logThis(Message, FileName, VClock, Modes) ->
     ok.
 
 writeLogs(S, Message, VClock, Node) ->
-    io:format(S, "~s~n~s ~w~n", [Message, Node, VClock]).
+    io:format(S, "~s ~w~n~s~n", [Node, VClock, Message]).

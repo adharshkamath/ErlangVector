@@ -2,7 +2,7 @@
 -compile(debug_info).
 -export([init/0]).
 -import(log, [logThis/4]).
--record(clock, { localTime=0,
+-record(clock, { localTime=1,
                   events=#{}}).
 -record(process, { pName="",
                    pClock=#clock{},
