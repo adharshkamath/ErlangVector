@@ -12,5 +12,13 @@ logThis(Message, FileName, VClock, Modes) ->
     end,
     ok.
 
+getVCFormat(VClock) ->
+    TempVC = maps:fold(fun(K,V,AccIn) when is_atom(K) -> 
+                                            AccIn ++ "\"" ++ atom_to_list(K) ++ "\"" ++ ":" ++ integer_to_list(V) ++ ","
+                                        end, 
+                        "{", VClock),
+    string:substr(TempVC, 1, length(TempVC)-1) ++ "}".
+    
+
 writeLogs(S, Message, VClock, Node) ->
-    io:format(S, "~s ~w~n~s~n", [Node, VClock, Message]).
+    io:format(S, "~s ~s~n~s~n", [Node, getVCFormat(VClock), Message]).

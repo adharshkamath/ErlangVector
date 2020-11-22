@@ -12,14 +12,14 @@
 init() ->
     ProcessName = list_to_atom(lists:nth(1, string:tokens(atom_to_list(node()), "@"))),
     NewP = newProcess(ProcessName),
-    log:logThis("Initialization complete", atom_to_list(ProcessName), maps:to_list(NewP#process.tVector), [write]),
+    log:logThis("Initialization complete", atom_to_list(ProcessName), NewP#process.tVector, [write]),
     AtomName = list_to_atom(lists:nth(1, string:tokens(atom_to_list(node()), "@"))),
     register(AtomName, spawn(fun() -> receiveMessage(NewP) end)).
 
 merge(Vector1, Vector2, ThisP = #process{pName=PName}) ->
     Result = maps:fold(fun(K, V, Map) -> maps:update_with(K, fun(X) -> erlang:max(X, V) end, V, Map) end, Vector1, Vector2),
     ProcessName = list_to_atom(lists:nth(1, string:tokens(atom_to_list(node()), "@"))),
-    log:logThis("Updating local vector clock", atom_to_list(ProcessName), maps:to_list(Result), [append]),
+    log:logThis("Updating local vector clock", atom_to_list(ProcessName), Result, [append]),
     #process{
         pName=PName,
         tVector=Result,
@@ -58,7 +58,7 @@ newLocalEvent(EvName, #process{pName=PName, tVector=Vector, pClock=Clock}) ->
     NewEvents = maps:put(list_to_atom(EvName), NewTime, Clock#clock.events),
     NewClock = #clock{localTime=NewTime, events=NewEvents},
     ProcessName = list_to_atom(lists:nth(1, string:tokens(atom_to_list(node()), "@"))),
-    log:logThis(EvName, atom_to_list(ProcessName), maps:to_list(NewVector), [append]),
+    log:logThis(EvName, atom_to_list(ProcessName), NewVector, [append]),
     #process{
             pName=PName,
             pClock=NewClock,
