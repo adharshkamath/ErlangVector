@@ -1,6 +1,6 @@
 -module(vclock).
 -compile(debug_info).
--export([merge/3, newProcess/1, newLocalEvent/2, newProcessVector/0, broadcastVector/1, sendMsgToNode/2, init/0]).
+-export([init/0]).
 -import(log, [logThis/4]).
 -record(clock, { localTime=0,
                   events=#{}}).
