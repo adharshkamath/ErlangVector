@@ -7,7 +7,7 @@
 logThis(Message, FileName, VClock, Modes) ->
     {ok, Device} = file:open(FileName ++ "_log.txt", Modes),
     try 
-        writeLogs(Device, Message, VClock, FileName)
+        writeLogs(Device, integer_to_list(os:system_time()) ++ "\t" ++ Message, VClock, FileName)
         after file:close(Device)
     end,
     ok.
